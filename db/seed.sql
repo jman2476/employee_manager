@@ -1,9 +1,9 @@
 USE employee_management_db;
 
-INSERT INTO departments (dep_name) VALUES
+INSERT INTO departments (department_name) VALUES
     ('Sales'),
     ('Reasearch & Development'),
-    ('Human Resources'),
+    ('Skeeball'),
     ('Manufacturing'),
     ('Information Security'),
     ('Support & Logistics'),
@@ -35,4 +35,14 @@ INSERT INTO roles (title, salary, department_id) VALUES
 
 
 INSERT INTO employees (first_name, last_name,role_id, manager_id) VALUES 
-    ("Gary1", 'Smith2', 1, 1);
+    ("Gary1", 'Smith2', 1, null),
+    ("Under", 'Gary1', 8, 1),
+    ("Under Under", 'Gary', 15, 2),
+    ("Joe", 'Baker', 7, null),
+    ("Tommy", 'Shoebaker', 14, 4),
+    ("Tanty", 'Shoebaker', 21, 5),
+    ("Bob", 'Johnson', 2, null),
+    ("Meredith", 'Crow', 9, 7),
+    ("Larry", 'Watermelon', 9, 7),
+    ("Beth", 'Coopernuts', 16, 1),
+    ("Tony", 'Scrumpkin', 17, 1);
