@@ -1,4 +1,11 @@
 const db = require('../db/connections') //import database
+const inquirer = require('inquirer') // import inquirer
+const {addDeptArray,
+    addRoleArray,
+    addEmplArray,
+    updateRoleArray,
+    updateManagerArray } = require('../assets/prompts')
+
 // view all departments
 async function getDepartments() {
     try {
@@ -15,7 +22,6 @@ async function getDepartments() {
         console.log(err)
     }
 }
-
 
 // view all roles
 async function getRoles() {
@@ -66,10 +72,12 @@ async function getEmployees() {
     }
 }
 
-
 // add a department
-async function addDepartment(newDepartment) {
-    try {
+async function addDepartment() {
+    try{
+        const newDepartment = await inquirer.prompt(addDeptArray)
+        
+        try {
         // check if the department is in the list yet
         const [departments] = await db.query(
             `SELECT
@@ -77,7 +85,7 @@ async function addDepartment(newDepartment) {
             department_name
             FROM departments
             WHERE department_name = ?`,
-            newDepartment
+            newDepartment.depName
         )
 
         // if the departments array has length, then say the department already exists
@@ -89,27 +97,23 @@ async function addDepartment(newDepartment) {
         const [insert] = await db.query(`
             INSERT INTO departments
             (department_name)
-            VALUES (?)`, newDepartment)
+            VALUES (?)`, newDepartment.depName)
 
         return console.log(`Department added successfully wih and id of ${insert.insertId}`)
 
     } catch (err) {
         console.log(err)
+    }} catch (err) {
+        console.log(err)
     }
 }
 
-
 // add a role
-// takes an object as parameter, in the format:
-// newRole = {
-//     title: 'string',
-//     salary: int,
-//     department_id: int
-// }
-
-
-async function addRole(newRole) {
+async function addRole() {
     try {
+        const newRole = await inquirer.prompt(addRoleArray)
+
+        try {
         // check if the role is in the table yet
         const [roles] = await db.query(
             `SELECT
@@ -141,6 +145,8 @@ async function addRole(newRole) {
 
     } catch (err) {
         console.log(err)
+    }} catch (err) {
+        console.log(err)
     }
 }
 
@@ -152,26 +158,18 @@ async function addRole(newRole) {
 //     role_id: Int,
 //     manager_id: int
 // }
-async function addEmployee(newEmployee) {
+async function addEmployee() {
     try {
+        const newEmployee = await inquirer.prompt(addEmplArray)
+
+        try {
         // get name of new Employee to check against existing employees
         const employeeName = `${newEmployee.first_name} ${newEmployee.last_name}`
         // check if the employee is in the table yet
         const [employees] = await db.query(
             `SELECT
-            employees.id,
-            CONCAT (employees.first_name, ' ', employees.last_name),
-            roles.title AS position,
-            departments.department_name AS department,
-            roles.salary,
-            CONCAT (managers.first_name, ' ', managers.last_name) AS manager
+            CONCAT (employees.first_name, ' ', employees.last_name)
             FROM employees
-            JOIN roles 
-                ON employees.role_id = roles.id
-            JOIN departments
-                ON roles.department_id = departments.id
-            LEFT JOIN employees AS managers
-                ON employees.manager_id = managers.id
             WHERE CONCAT (employees.first_name, ' ', employees.last_name) = ?`,
             employeeName
         )
@@ -182,23 +180,39 @@ async function addEmployee(newEmployee) {
         }
 
         // query to insert the employee
+        if(newEmployee.manager_id) {
+            const [insert] = await db.query(
+                `INSERT INTO employees
+                (first_name, last_name, role_id, manager_id)
+                VALUES (?, ?, ?, ?)`,
+                [newEmployee.first_name, newEmployee.last_name, newEmployee.role_id, newEmployee.manager_id]
+            )
+    
+            return console.log(`Employee added successfully with an id of ${insert.insertId}`)
+        }
+
         const [insert] = await db.query(
             `INSERT INTO employees
             (first_name, last_name, role_id, manager_id)
             VALUES (?, ?, ?, ?)`,
-            [newEmployee.first_name, newEmployee.last_name, newEmployee.role_id, newEmployee.manager_id]
+            [newEmployee.first_name, newEmployee.last_name, newEmployee.role_id, null]
         )
 
         return console.log(`Employee added successfully with an id of ${insert.insertId}`)
 
     } catch (err) {
         console.log(err)
+    }} catch (err) {
+        console.log(err)
     }
 }
 
 // update an employee's role
-async function updateRole(employee_id, role_id) {
+async function updateRole() {
     try {
+        const answers = await inquirer.prompt(updateRoleArray)
+
+        try {
         // check if there is a an employee with the specified id
         const [employees] = await db.query(
             `SELECT
@@ -206,7 +220,7 @@ async function updateRole(employee_id, role_id) {
             first_name
             FROM employees
             WHERE id = ?`,
-            employee_id
+            answers.employee_id
         )
 
         // check if the role exist
@@ -216,7 +230,7 @@ async function updateRole(employee_id, role_id) {
             title
             FROM roles
             WHERE id = ?`,
-            role_id
+            answers.role_id
         )
 
         
@@ -243,12 +257,17 @@ async function updateRole(employee_id, role_id) {
 
     } catch (err) {
         console.log(err)
+    }} catch (err) {
+        console.log(err)
     }
 }
 
 // update an meployee's manager
 async function updateManager(employee_id, manager_id) {
     try {
+        const answers = await inquirer.prompt(updateManagerArray)
+
+        try {
         // check if there is a an employee with the specified id
         const [employees] = await db.query(
             `SELECT
@@ -256,7 +275,7 @@ async function updateManager(employee_id, manager_id) {
             first_name
             FROM employees
             WHERE id = ?`,
-            employee_id
+            answers.employee_id
         )
          
         // check if the role exist
@@ -266,7 +285,7 @@ async function updateManager(employee_id, manager_id) {
             first_name
             FROM employees
             WHERE id = ?`,
-            manager_id
+            answers.manager_id
         )
      
         // if there is a user with the given id, and the role exists, change the role_id
@@ -290,6 +309,8 @@ async function updateManager(employee_id, manager_id) {
             return console.log('Error: Neither the employee or the manager you specified exists')
         }
     } catch (err) {
+        console.log(err)
+    }} catch (err) {
         console.log(err)
     }
 }
