@@ -14,9 +14,9 @@ const { getDepartments,
 // bring in the inquirer questions
 const {menuArray} = require('./assets/prompts')
 
-
 // init
 async function init() {
+    console.log('\n')
     try {
         const answer = await inquirer.prompt(menuArray)
 
@@ -57,4 +57,5 @@ async function init() {
 
 }
 
+console.log('Welcome to the employee manager program!!!')
 init()
