@@ -33,7 +33,7 @@ SELECT
         ON employees.manager_id = managers.id;
 
 -- add a department
-INSERT INTO department
+INSERT INTO departments
     (department_name)
     VALUES (?);
 
@@ -43,7 +43,7 @@ INSERT INTO roles
     VALUES (?, ?, ?);
 
 -- add an employee
-INSERT INTO emploees
+INSERT INTO employees
     (first_name, last_name, role_id, manager_id)
     VALUES (?, ?, ?, ?);
 
